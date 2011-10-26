@@ -82,12 +82,14 @@ Oke, saatnya membuat models untuk aplikasi kita. Buka file /stream/audio/models.
 
 <pre class="prettyprint">
 from django.db import models
+import datetime
 
 class audio(models.Model):
     name = models.CharField(max_length=100, unique=True)
     audio_file = models.FileField(upload_to='../media/uploads/', null=False, blank=False)
     genre = models.CharField(max_length=50, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    upload_date = models.DateTimeField(default=datetime.datetime.now)
 </pre>
 
 Udah, selesai bikin model. Untuk meng-convert jadi database dan tabel-tabel, serahkan pada django dan tools nya :)
@@ -138,10 +140,56 @@ Silakan entry 1-2 data sebagai contoh untuk membangun front-end nantinya. Wow, m
 
 Proses CRUD udah bisa dijalankan, berarti misi membuat back-end telah selesai. Mari sekarang kita buat front-end nya.
 
-Edit settings.py
-----------------
+Views
+-----
+Pengembangan front-end kita mulai dengan membuat function didalam views.py yang akan memanggil file template html dan menampilkan datanya.
 
-- project_dir setting (maybe later, focus on back-end app dulu)
-- building front-end app -> views.py & urls.py
+<pre class="prettyprint">
+from models import audio
+from django.shortcuts import render_to_response
+
+def listfile(request):
+    files = audio.objects.all()
+
+    return render_to_response('index.html', {'data': files})
+
+</pre>
+
+function render_to_response digunakan untuk menggabungkan html & data
+audio.objects.all() sama saja dengan perintah SQL: "SELECT * FROM tabel_audio"
+
+
+Edit settings.py For Front-end
+------------------------------
+File html akan kita taro di /stream/templates/. Untuk itu kita perlu tambahkan ke settings.py direktori tersebut.
+
+<pre class="prettyprint">
+TEMPLATE_DIRS = (
+    "/home/riza/django_projects/stream/templates",
+)
+</pre>
+
+Jangan lupa buat direktori itu ya :)
+
+Kemudian kita bikin file template-nya, kita namakan index.html
+<pre class="prettyprint">
+    /stream/$ mkdir templates
+    /stream/templates$ cd templates
+    /stream/templates$ touch index.html
+</pre>
+
+edit index.html, tambahkan code berikut untuk menampilkan nama file audio didalam list:
+<pre class="prettyprint">
+<h2>Local Audio Stream</h2>
+<ul>
+{% for file in files %}
+    <li>{{ file.name }}</li>
+{% endfor %}
+</ul>
+</pre>
+
+{% %} digunakan untuk sintaks django template. Sedangkan {{ }} digunakan untuk menampilkan variabel dari django views.
+
+- play the audio!
 - styling the app
 - done!
